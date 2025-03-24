@@ -53,6 +53,4 @@ void node_print(node_t *root) {
             putchar(')');
             break;
     }
-
-    putchar('\n');
 }
