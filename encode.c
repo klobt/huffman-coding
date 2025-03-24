@@ -2,12 +2,14 @@
 #include "array.h"
 #include "binary.h"
 #include "node.h"
+#include "node_queue.h"
 
 int main(int argc, char *argv[]) {
     node_t *tree, *new_tree;
     char_array_t *out_array, *in_array, *tree_buffer;
     binary_reader_t reader;
     binary_writer_t writer;
+    node_queue_t *queue;
 
     tree = node_create_branch(
         node_create_branch(
@@ -64,6 +66,32 @@ int main(int argc, char *argv[]) {
 
     char_array_free(out_array);
     char_array_free(in_array);
+
+    queue = node_queue_create();
+
+    node_queue_insert(queue, node_create_leaf('_', 10));
+    node_queue_insert(queue, node_create_leaf('D', 10));
+    node_queue_insert(queue, node_create_leaf('A', 11));
+    node_queue_insert(queue, node_create_leaf('E', 7));
+    node_queue_insert(queue, node_create_leaf('C', 2));
+    node_queue_insert(queue, node_create_leaf('B', 6));
+
+    while (queue->array->size > 1) {
+        node_queue_insert(
+            queue,
+            node_create_branch(
+                node_queue_pop_minimum(queue),
+                node_queue_pop_minimum(queue)
+            )
+        );
+    }
+
+    tree = node_queue_pop_minimum(queue);
+
+    node_print(tree);
+    putchar('\n');
+
+    node_free(tree);
 
     return 0;
 }

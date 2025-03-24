@@ -1,7 +1,7 @@
 #ifndef KLOBT_HUFFMAN_CODING__NODE_
 #define KLOBT_HUFFMAN_CODING__NODE_
 
-#include "array.h"
+#include "char_array.h"
 
 typedef enum {
     NODE_LEAF,

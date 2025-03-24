@@ -3,10 +3,15 @@
 !/meson.build
 !/encode.c
 !/array.h
-!/array.c
 !/binary.h
 !/binary.c
+!/char_array.h
+!/char_array.c
 !/node.h
 !/node.c
+!/node_array.h
+!/node_array.c
+!/node_queue.h
+!/node_queue.c
 !/utilities.h
 !/utilities.c

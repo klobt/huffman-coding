@@ -1,7 +1,7 @@
 #ifndef KLOBT_HUFFMAN_CODING__BINARY_
 #define KLOBT_HUFFMAN_CODING__BINARY_
 
-#include "array.h"
+#include "char_array.h"
 #include "stddef.h"
 
 typedef struct {
