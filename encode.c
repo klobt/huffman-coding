@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include "array.h"
 #include "binary.h"
 #include "node.h"
 
 int main(int argc, char *argv[]) {
     node_t *tree;
-    int a, b;
+    char_array_t *out_array, *in_array;
     binary_reader_t reader;
     binary_writer_t writer;
 
@@ -30,22 +31,31 @@ int main(int argc, char *argv[]) {
 
     node_free(tree);
 
-    a = 13;
+    out_array = char_array_create();
+    in_array = char_array_create();
 
-    reader.buffer = (const char *) &a;
-    reader.buffer_size = sizeof(a);
+    char_array_add(out_array, 'a');
+    char_array_add(out_array, 'b');
+    char_array_add(out_array, 'b');
+    char_array_add(out_array, 'a');
+    char_array_add(out_array, '\0');
+
+    reader.buffer = out_array;
     reader.bit_position = 0;
 
-    writer.buffer = (char *) &b;
-    writer.buffer_size = sizeof(b);
+    writer.buffer = in_array;
     writer.bit_position = 0;
 
     for (binary_result_t r = binary_read(&reader); r != BINARY_END_OF_BUFFER; r = binary_read(&reader)) {
         printf("%d", r);
+        binary_write(&writer, r);
     }
     putchar('\n');
 
-    printf("%d\n", b);
+    printf("%s\n", in_array->elements);
+
+    char_array_free(out_array);
+    char_array_free(in_array);
 
     return 0;
 }

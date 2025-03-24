@@ -24,25 +24,23 @@ void write_bit(char *byte, size_t bit_position, unsigned int bit) {
 binary_result_t binary_read(binary_reader_t *reader) {
     binary_result_t result;
 
-    if (reader->bit_position / 8 >= reader->buffer_size) {
+    if (reader->bit_position / 8 >= reader->buffer->size) {
         return BINARY_END_OF_BUFFER;
     }
 
-    result = read_bit(reader->buffer[reader->bit_position / 8], reader->bit_position % 8);
+    result = read_bit(reader->buffer->elements[reader->bit_position / 8], reader->bit_position % 8);
 
     reader->bit_position++;
 
     return result;
 }
 
-binary_result_t binary_write(binary_writer_t *writer, unsigned int bit) {
-    if (writer->bit_position / 8 >= writer->buffer_size) {
-        return BINARY_END_OF_BUFFER;
+void binary_write(binary_writer_t *writer, unsigned int bit) {
+    if (writer->bit_position / 8 >= writer->buffer->size) {
+        char_array_add(writer->buffer, 0);
     }
 
-    write_bit(&writer->buffer[writer->bit_position / 8], writer->bit_position % 8, bit);
+    write_bit(&writer->buffer->elements[writer->bit_position / 8], writer->bit_position % 8, bit);
 
     writer->bit_position++;
-
-    return bit % 2;
 }

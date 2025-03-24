@@ -2,6 +2,8 @@
 !/.gitignore
 !/meson.build
 !/encode.c
+!/array.h
+!/array.c
 !/binary.h
 !/binary.c
 !/node.h
