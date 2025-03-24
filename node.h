@@ -1,6 +1,8 @@
 #ifndef KLOBT_HUFFMAN_CODING__NODE_
 #define KLOBT_HUFFMAN_CODING__NODE_
 
+#include "array.h"
+
 typedef enum {
     NODE_LEAF,
     NODE_BRANCH,
@@ -35,5 +37,7 @@ node_t *node_create_leaf(char byte, unsigned int weight);
 node_t *node_create_branch(node_t *left, node_t *right);
 void node_free(node_t *root);
 void node_print(node_t *root);
+void node_encode(node_t *root, char_array_t *buffer);
+size_t node_decode(char_array_t *buffer, size_t offset, node_t **tree);
 
 #endif

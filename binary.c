@@ -44,3 +44,11 @@ void binary_write(binary_writer_t *writer, unsigned int bit) {
 
     writer->bit_position++;
 }
+
+void binary_pad(binary_writer_t *writer, unsigned int bit) {
+    while (writer->bit_position % 8 > 0) {
+        write_bit(&writer->buffer->elements[writer->bit_position / 8], writer->bit_position % 8, bit);
+
+        writer->bit_position++;
+    }
+}

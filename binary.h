@@ -22,5 +22,6 @@ typedef enum {
 
 binary_result_t binary_read(binary_reader_t *reader);
 void binary_write(binary_writer_t *writer, unsigned int bit);
+void binary_pad(binary_writer_t *writer, unsigned int bit);
 
 #endif

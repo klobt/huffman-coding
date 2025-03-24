@@ -4,8 +4,8 @@
 #include "node.h"
 
 int main(int argc, char *argv[]) {
-    node_t *tree;
-    char_array_t *out_array, *in_array;
+    node_t *tree, *new_tree;
+    char_array_t *out_array, *in_array, *tree_buffer;
     binary_reader_t reader;
     binary_writer_t writer;
 
@@ -28,6 +28,14 @@ int main(int argc, char *argv[]) {
 
     node_print(tree);
     putchar('\n');
+
+    tree_buffer = char_array_create();
+    node_encode(tree, tree_buffer);
+    node_decode(tree_buffer, 0, &new_tree);
+    node_print(new_tree);
+    putchar('\n');
+    node_free(new_tree);
+    char_array_free(tree_buffer);
 
     node_free(tree);
 
