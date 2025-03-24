@@ -1,0 +1,6 @@
+*
+!/.gitignore
+!/meson.build
+!/encode.c
+!/node.h
+!/node.c
