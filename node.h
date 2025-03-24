@@ -9,13 +9,13 @@ typedef enum {
 typedef struct {
     node_type_t type;
     unsigned int weight;
-} node_base_t;
+} base_node_t;
 
 typedef struct {
     node_type_t type;
     unsigned int weight;
     char byte;
-} node_leaf_t;
+} leaf_node_t;
 
 typedef union node node_t;
 
@@ -23,12 +23,12 @@ typedef struct {
     node_type_t type;
     unsigned int weight;
     node_t *left, *right;
-} node_branch_t;
+} branch_node_t;
 
 union node {
-    node_base_t base;
-    node_leaf_t leaf;
-    node_branch_t branch;
+    base_node_t base;
+    leaf_node_t leaf;
+    branch_node_t branch;
 };
 
 node_t *node_create_leaf(char byte, unsigned int weight);
