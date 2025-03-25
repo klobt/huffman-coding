@@ -2,6 +2,7 @@
 #define KLOBT_HUFFMAN_CODING__NODE_
 
 #include "char_array.h"
+#include "node_breadcrumb_array.h"
 
 typedef enum {
     NODE_LEAF,
@@ -39,5 +40,6 @@ void node_free(node_t *root);
 void node_print(node_t *root);
 void node_encode(node_t *root, char_array_t *buffer);
 size_t node_decode(char_array_t *buffer, size_t offset, node_t **tree);
+void node_traverse(const node_t *root, void (*callback)(const leaf_node_t *leaf, const node_breadcrumb_array_t *breadcrumbs));
 
 #endif

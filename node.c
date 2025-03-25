@@ -76,7 +76,7 @@ void node_encode_layout(node_t *root, binary_writer_t *writer) {
 }
 
 void node_encode_leaf_values(node_t *root, char_array_t *buffer) {
-        switch (root->base.type) {
+    switch (root->base.type) {
         case NODE_LEAF:
             char_array_add(buffer, root->leaf.byte);
             break;
@@ -144,4 +144,28 @@ size_t node_decode(char_array_t *buffer, size_t offset, node_t **tree) {
     *tree = node_decode_tree(&reader, &next_leaf_index);
 
     return (reader.bit_position - 1) / 8 + 1;
+}
+
+void traverse(const node_t *node, void (*callback)(const leaf_node_t *leaf, const node_breadcrumb_array_t *breadcrumbs), node_breadcrumb_array_t *breadcrumbs) {
+    switch (node->base.type) {
+        case NODE_LEAF:
+            callback(&node->leaf, breadcrumbs);
+            break;
+        case NODE_BRANCH:
+            node_breadcrumb_array_add(breadcrumbs, NODE_BREADCRUMB_LEFT);
+            traverse(node->branch.left, callback, breadcrumbs);
+            node_breadcrumb_array_pop(breadcrumbs);
+            node_breadcrumb_array_add(breadcrumbs, NODE_BREADCRUMB_RIGHT);
+            traverse(node->branch.right, callback, breadcrumbs);
+            node_breadcrumb_array_pop(breadcrumbs);
+            break;
+    }
+}
+
+void node_traverse(const node_t *root, void (*callback)(const leaf_node_t *leaf, const node_breadcrumb_array_t *breadcrumbs)) {
+    node_breadcrumb_array_t *breadcrumbs;
+
+    breadcrumbs = node_breadcrumb_array_create();
+    traverse(root, callback, breadcrumbs);
+    node_breadcrumb_array_free(breadcrumbs);
 }

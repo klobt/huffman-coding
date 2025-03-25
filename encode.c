@@ -1,80 +1,65 @@
 #include <stdio.h>
-#include "array.h"
-#include "binary.h"
-#include "node.h"
+#include <stdlib.h>
+#include "config.h"
 #include "node_queue.h"
+#include "node_breadcrumb_array.h"
 
-int main(int argc, char *argv[]) {
-    node_t *tree, *new_tree;
-    char_array_t *out_array, *in_array, *tree_buffer;
-    binary_reader_t reader;
-    binary_writer_t writer;
-    node_queue_t *queue;
+#define FILE_BUFFER_SIZE 1024
 
-    tree = node_create_branch(
-        node_create_branch(
-            node_create_leaf('_', 10),
-            node_create_leaf('D', 10)
-        ),
-        node_create_branch(
-            node_create_leaf('A', 11),
-            node_create_branch(
-                node_create_leaf('E', 7),
-                node_create_branch(
-                    node_create_leaf('C', 2),
-                    node_create_leaf('B', 6)
-                )
-            )
-        )
-    );
+void parse_arguments(int argc, char *argv[], const char **filename) {
+    if (argc != 2) {
+        fprintf(stderr, "usage: %s FILE\n", argv[0]);
 
-    node_print(tree);
-    putchar('\n');
-
-    tree_buffer = char_array_create();
-    node_encode(tree, tree_buffer);
-    node_decode(tree_buffer, 0, &new_tree);
-    node_print(new_tree);
-    putchar('\n');
-    node_free(new_tree);
-    char_array_free(tree_buffer);
-
-    node_free(tree);
-
-    out_array = char_array_create();
-    in_array = char_array_create();
-
-    char_array_add(out_array, 'a');
-    char_array_add(out_array, 'b');
-    char_array_add(out_array, 'b');
-    char_array_add(out_array, 'a');
-    char_array_add(out_array, '\0');
-
-    reader.buffer = out_array;
-    reader.bit_position = 0;
-
-    writer.buffer = in_array;
-    writer.bit_position = 0;
-
-    for (binary_result_t r = binary_read(&reader); r != BINARY_END_OF_BUFFER; r = binary_read(&reader)) {
-        printf("%d", r);
-        binary_write(&writer, r);
+        exit(EXIT_FAILURE);
     }
-    putchar('\n');
 
-    printf("%s\n", in_array->elements);
+    *filename = (const char *) argv[1];
+}
 
-    char_array_free(out_array);
-    char_array_free(in_array);
+void count_bytes(const char *filename, unsigned int byte_counts[256]) {
+    FILE *file;
+    char file_buffer[FILE_BUFFER_SIZE];
+    size_t bytes_read;
+
+    file = fopen(filename, "r");
+
+    if (file == NULL) {
+        perror(ENCODE_PROGRAM_NAME);
+
+        exit(EXIT_FAILURE);
+    }
+
+    for (size_t byte = 0; byte < 256; byte++) {
+        byte_counts[byte] = 0;
+    }
+
+    while ((bytes_read = fread(file_buffer, sizeof(char), FILE_BUFFER_SIZE, file)) != 0) {
+        for (size_t index = 0; index < bytes_read; index++) {
+            byte_counts[(size_t) file_buffer[index]]++;
+        }
+    }
+
+    if (ferror(file)) {
+        perror(ENCODE_PROGRAM_NAME);
+        fclose(file);
+
+        exit(EXIT_FAILURE);
+    }
+
+    fclose(file);
+}
+
+node_t *create_tree_from_byte_counts(const unsigned int byte_counts[256]) {
+    node_queue_t *queue;
+    node_t *tree;
 
     queue = node_queue_create();
 
-    node_queue_insert(queue, node_create_leaf('_', 10));
-    node_queue_insert(queue, node_create_leaf('D', 10));
-    node_queue_insert(queue, node_create_leaf('A', 11));
-    node_queue_insert(queue, node_create_leaf('E', 7));
-    node_queue_insert(queue, node_create_leaf('C', 2));
-    node_queue_insert(queue, node_create_leaf('B', 6));
+    for (size_t byte = 0; byte < 256; byte++) {
+        if (byte_counts[byte] > 0) {
+            node_queue_insert(queue, node_create_leaf((char) byte, byte_counts[byte]));
+        }
+    }
 
     while (queue->array->size > 1) {
         node_queue_insert(
@@ -88,10 +73,58 @@ int main(int argc, char *argv[]) {
 
     tree = node_queue_pop_minimum(queue);
 
+    node_queue_free(queue);
+
+    return tree;
+}
+
+node_breadcrumb_array_t *byte_codes[256];
+
+void retrieve_byte_code_traverse_callback(const leaf_node_t *leaf, const node_breadcrumb_array_t *breadcrumbs) {
+    byte_codes[(size_t) leaf->byte] = node_breadcrumb_array_clone(breadcrumbs);
+}
+
+void retrieve_byte_codes(const node_t *root) {
+    for (size_t byte = 0; byte < 256; byte++) {
+        byte_codes[byte] = NULL;
+    }
+
+    node_traverse(root, retrieve_byte_code_traverse_callback);
+}
+
+int main(int argc, char *argv[]) {
+    const char *filename;
+    unsigned int byte_counts[256];
+    node_t *tree;
+
+    parse_arguments(argc, argv, &filename);
+
+    count_bytes(filename, byte_counts);
+
+    tree = create_tree_from_byte_counts(byte_counts);
+
     node_print(tree);
     putchar('\n');
 
+    retrieve_byte_codes(tree);
+
     node_free(tree);
+
+    for (size_t byte = 0; byte < 256; byte++) {
+        if (byte_codes[byte] != NULL) {
+            printf("%c: ", (char) byte);
+            for (size_t index = 0; index < byte_codes[byte]->size; index++) {
+                printf("%d", byte_codes[byte]->elements[index]);
+            }
+            putchar('\n');
+        }
+    }
+
+    for (size_t byte = 0; byte < 256; byte++) {
+        if (byte_codes[byte] != NULL) {
+            node_breadcrumb_array_free(byte_codes[byte]);
+        }
+    }
 
     return 0;
 }

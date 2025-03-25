@@ -5,12 +5,15 @@
 !/array.h
 !/binary.h
 !/binary.c
+!/config.h
 !/char_array.h
 !/char_array.c
 !/node.h
 !/node.c
 !/node_array.h
 !/node_array.c
+!/node_breadcrumb_array.h
+!/node_breadcrumb_array.c
 !/node_queue.h
 !/node_queue.c
 !/utilities.h
