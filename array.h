@@ -10,7 +10,7 @@
     typedef struct {                                                    \
         type *elements;                                                 \
         size_t capacity;                                                \
-        size_t size;                                                    \
+        unsigned long long size;                                        \
     } name##_array_t;                                                   \
                                                                         \
     name##_array_t *name##_array_create();                              \
