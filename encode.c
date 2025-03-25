@@ -6,9 +6,11 @@
 
 #define FILE_BUFFER_SIZE 1024
 
-void count_bytes(FILE *file, unsigned int byte_counts[256]) {
+void count_bytes(FILE *file, unsigned long long *total, unsigned int byte_counts[256]) {
     char file_buffer[FILE_BUFFER_SIZE];
     size_t bytes_read;
+
+    *total = 0;
 
     for (size_t byte = 0; byte < 256; byte++) {
         byte_counts[byte] = 0;
@@ -18,6 +20,7 @@ void count_bytes(FILE *file, unsigned int byte_counts[256]) {
         for (size_t index = 0; index < bytes_read; index++) {
             byte_counts[(size_t) file_buffer[index]]++;
         }
+        *total += bytes_read;
     }
 
     if (ferror(file)) {
@@ -73,16 +76,24 @@ void retrieve_byte_codes(const node_t *root) {
 
 int main(int argc, char *argv[]) {
     FILE *input_file, *output_file;
+    unsigned long long total;
     unsigned int byte_counts[256];
     node_t *tree;
+    char total_bytes[8];
 
     parse_arguments(argc, argv, DECODE_PROGRAM_NAME, &input_file, &output_file);
 
-    count_bytes(input_file, byte_counts);
+    count_bytes(input_file, &total, byte_counts);
 
     tree = create_tree_from_byte_counts(byte_counts);
 
     node_encode(tree, output_file);
+
+    long_to_little_endian(total, total_bytes);
+    if (fwrite(total_bytes, sizeof(char), 8, output_file) != 8) {
+        perror(ENCODE_PROGRAM_NAME);
+        return EXIT_FAILURE;
+    }
 
     retrieve_byte_codes(tree);
 

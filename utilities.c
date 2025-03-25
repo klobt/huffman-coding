@@ -78,3 +78,48 @@ void close_files(FILE *input_file, FILE *output_file) {
         fclose(output_file);
     }
 }
+
+bool is_little_endian(void) {
+    union {
+        unsigned long long _long;
+        char bytes[8];
+    } long_bytes;
+
+    long_bytes._long = 1;
+
+    return long_bytes.bytes[0] == 1;
+}
+
+void long_to_little_endian(unsigned long long input, char output[8]) {
+    union {
+        unsigned long long _long;
+        char bytes[8];
+    } long_bytes;
+    bool _is_little_endian;
+    size_t left_index;
+
+    long_bytes._long = input;
+
+    _is_little_endian = is_little_endian();
+    for (size_t index = 0; index < 8; index++) {
+        left_index = _is_little_endian ? index : 7 - index;
+        output[left_index] = long_bytes.bytes[index];
+    }
+}
+
+unsigned long long little_endian_to_long(char input[8]) {
+    union {
+        unsigned long long _long;
+        char bytes[8];
+    } long_bytes;
+    bool _is_little_endian;
+    size_t left_index;
+
+    _is_little_endian = is_little_endian();
+    for (size_t index = 0; index < 8; index++) {
+        left_index = _is_little_endian ? index : 7 - index;
+        long_bytes.bytes[left_index] = input[index];
+    }
+
+    return long_bytes._long;
+}

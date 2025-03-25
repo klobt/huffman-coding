@@ -4,9 +4,9 @@
 
 #define SWAP(x, y)                                              \
     {                                                           \
-        x = (node_t *) ((unsigned long) x ^ (unsigned long) y); \
-        y = (node_t *) ((unsigned long) x ^ (unsigned long) y); \
-        x = (node_t *) ((unsigned long) x ^ (unsigned long) y); \
+        x = (node_t *) ((unsigned long long) x ^ (unsigned long long) y); \
+        y = (node_t *) ((unsigned long long) x ^ (unsigned long long) y); \
+        x = (node_t *) ((unsigned long long) x ^ (unsigned long long) y); \
     }
 
 node_queue_t *node_queue_create() {
