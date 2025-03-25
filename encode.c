@@ -103,22 +103,11 @@ int main(int argc, char *argv[]) {
 
     tree = create_tree_from_byte_counts(byte_counts);
 
-    node_print(tree);
-    putchar('\n');
+    node_encode(tree, stdout);
 
     retrieve_byte_codes(tree);
 
     node_free(tree);
-
-    for (size_t byte = 0; byte < 256; byte++) {
-        if (byte_codes[byte] != NULL) {
-            printf("%c: ", (char) byte);
-            for (size_t index = 0; index < byte_codes[byte]->size; index++) {
-                printf("%d", byte_codes[byte]->elements[index]);
-            }
-            putchar('\n');
-        }
-    }
 
     for (size_t byte = 0; byte < 256; byte++) {
         if (byte_codes[byte] != NULL) {

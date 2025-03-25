@@ -17,11 +17,15 @@ node_t *node_create_leaf(char byte, unsigned int weight) {
 
 node_t *node_create_branch(node_t *left, node_t *right) {
     node_t *node;
+    unsigned int left_weight, right_weight;
+
+    left_weight = left != NULL ? left->base.weight : 0;
+    right_weight = right != NULL ? right->base.weight : 0;
 
     node = malloc(sizeof(node));
 
     node->branch.type = NODE_BRANCH;
-    node->branch.weight = left->base.weight + right->base.weight;
+    node->branch.weight = left_weight + right_weight;
     node->branch.left = left;
     node->branch.right = right;
 
@@ -29,6 +33,10 @@ node_t *node_create_branch(node_t *left, node_t *right) {
 }
 
 void node_free(node_t *root) {
+    if (root == NULL) {
+        return;
+    }
+
     switch (root->base.type) {
         case NODE_LEAF:
             free(root);
@@ -41,9 +49,11 @@ void node_free(node_t *root) {
     }
 }
 
-void node_print(node_t *root) {
+void node_print(const node_t *root) {
     if (root == NULL) {
         putchar('N');
+
+        return;
     }
 
     switch (root->base.type) {
@@ -62,7 +72,7 @@ void node_print(node_t *root) {
     }
 }
 
-void node_encode_layout(node_t *root, binary_writer_t *writer) {
+void node_encode_layout(const node_t *root, binary_writer_t *writer) {
         switch (root->base.type) {
         case NODE_LEAF:
             binary_write(writer, 0);
@@ -75,27 +85,28 @@ void node_encode_layout(node_t *root, binary_writer_t *writer) {
     }
 }
 
-void node_encode_leaf_values(node_t *root, char_array_t *buffer) {
+void node_encode_leaf_values(const node_t *root, FILE *stream) {
     switch (root->base.type) {
         case NODE_LEAF:
-            char_array_add(buffer, root->leaf.byte);
+            putc(root->leaf.byte, stream);
             break;
         case NODE_BRANCH:
-            node_encode_leaf_values(root->branch.left, buffer);
-            node_encode_leaf_values(root->branch.right, buffer);
+            node_encode_leaf_values(root->branch.left, stream);
+            node_encode_leaf_values(root->branch.right, stream);
             break;
     }
 }
 
-void node_encode(node_t *root, char_array_t *buffer) {
-    binary_writer_t writer;
+void node_encode(const node_t *root, FILE *stream) {
+    binary_writer_t *writer;
 
-    writer.buffer = buffer;
-    writer.bit_position = buffer->size * 8;
+    writer = binary_writer_create(stream);
 
-    node_encode_layout(root, &writer);
-    binary_pad(&writer, 0);
-    node_encode_leaf_values(root, buffer);
+    node_encode_layout(root, writer);
+    binary_pad(writer, 0);
+    node_encode_leaf_values(root, stream);
+
+    binary_writer_free(writer);
 }
 
 size_t node_decode_leaf_count(binary_reader_t *reader) {
@@ -109,15 +120,15 @@ size_t node_decode_leaf_count(binary_reader_t *reader) {
     }
 }
 
-node_t *node_decode_tree(binary_reader_t *reader, size_t *next_leaf_index) {
+node_t *node_decode_tree(binary_reader_t *reader, char **next_leaf) {
     node_t *left, *right;
 
     switch (binary_read(reader)) {
         case BINARY_ZERO:
-            return node_create_leaf(reader->buffer->elements[(*next_leaf_index)++], 0);
+            return node_create_leaf(*(*next_leaf)++, 0);
         case BINARY_ONE:
-            left = node_decode_tree(reader, next_leaf_index);
-            right = node_decode_tree(reader, next_leaf_index);
+            left = node_decode_tree(reader, next_leaf);
+            right = node_decode_tree(reader, next_leaf);
 
             return node_create_branch(left, right);
         default:
@@ -125,25 +136,36 @@ node_t *node_decode_tree(binary_reader_t *reader, size_t *next_leaf_index) {
     }
 }
 
-size_t node_decode(char_array_t *buffer, size_t offset, node_t **tree) {
-    binary_reader_t reader;
+int node_decode(FILE *stream, node_t **tree) {
+    binary_reader_t *reader;
     size_t leaf_count;
-    size_t next_leaf_index;
+    int getc_result;
+    char *leaves, *leaf_p;
+    int result;
 
-    reader.bit_position = offset * 8;
+    reader = binary_reader_create(stream);
 
-    leaf_count = node_decode_leaf_count(&reader);
-    next_leaf_index = (reader.bit_position - 1) / 8 + 1;
+    leaf_count = node_decode_leaf_count(reader);
+    leaves = malloc(sizeof(char) * leaf_count);
 
-    if (next_leaf_index + leaf_count > buffer->size) {
-        return 0;
+    for (size_t index = 0; index < leaf_count; index++) {
+        getc_result = getc(stream);
+        if (getc_result == EOF) {
+             return -1;
+        }
+        leaves[index] = getc_result;
     }
 
-    reader.bit_position = offset * 8;
+    reader->bit_position = 0;
 
-    *tree = node_decode_tree(&reader, &next_leaf_index);
+    leaf_p = leaves;
+    *tree = node_decode_tree(reader, &leaf_p);
 
-    return (reader.bit_position - 1) / 8 + 1;
+    result = (reader->bit_position - 1) / 8 + 1;
+
+    binary_reader_free(reader);
+
+    return result;
 }
 
 void traverse(const node_t *node, void (*callback)(const leaf_node_t *leaf, const node_breadcrumb_array_t *breadcrumbs), node_breadcrumb_array_t *breadcrumbs) {
