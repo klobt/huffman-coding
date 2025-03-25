@@ -13,14 +13,14 @@
         unsigned long long size;                                        \
     } name##_array_t;                                                   \
                                                                         \
-    name##_array_t *name##_array_create();                              \
+    name##_array_t *name##_array_create(void);                          \
     void name##_array_free(name##_array_t *array);                      \
     void name##_array_add(name##_array_t *array, type element);         \
     type name##_array_pop(name##_array_t *array);                       \
     name##_array_t *name##_array_clone(const name##_array_t *array);
 
 #define IMPLEMENT_ARRAY(name, type)                                     \
-    name##_array_t *name##_array_create() {                             \
+    name##_array_t *name##_array_create(void) {                         \
         name##_array_t *array;                                          \
                                                                         \
         array = malloc(sizeof(name##_array_t));                         \

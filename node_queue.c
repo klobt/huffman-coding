@@ -9,7 +9,7 @@
         x = (node_t *) ((unsigned long long) x ^ (unsigned long long) y); \
     }
 
-node_queue_t *node_queue_create() {
+node_queue_t *node_queue_create(void) {
     node_queue_t *queue;
 
     queue = malloc(sizeof(node_queue_t));

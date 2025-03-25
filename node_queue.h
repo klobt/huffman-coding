@@ -7,7 +7,7 @@ typedef struct {
     node_array_t *array;
 } node_queue_t;
 
-node_queue_t *node_queue_create();
+node_queue_t *node_queue_create(void);
 void node_queue_free(node_queue_t *queue);
 void node_queue_insert(node_queue_t *queue, node_t *node);
 node_t *node_queue_pop_minimum(node_queue_t *queue);
