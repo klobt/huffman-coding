@@ -6,28 +6,9 @@
 
 #define FILE_BUFFER_SIZE 1024
 
-void parse_arguments(int argc, char *argv[], const char **filename) {
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s FILE\n", argv[0]);
-
-        exit(EXIT_FAILURE);
-    }
-
-    *filename = (const char *) argv[1];
-}
-
-void count_bytes(const char *filename, unsigned int byte_counts[256]) {
-    FILE *file;
+void count_bytes(FILE *file, unsigned int byte_counts[256]) {
     char file_buffer[FILE_BUFFER_SIZE];
     size_t bytes_read;
-
-    file = fopen(filename, "r");
-
-    if (file == NULL) {
-        perror(ENCODE_PROGRAM_NAME);
-
-        exit(EXIT_FAILURE);
-    }
 
     for (size_t byte = 0; byte < 256; byte++) {
         byte_counts[byte] = 0;
@@ -45,8 +26,6 @@ void count_bytes(const char *filename, unsigned int byte_counts[256]) {
 
         exit(EXIT_FAILURE);
     }
-
-    fclose(file);
 }
 
 node_t *create_tree_from_byte_counts(const unsigned int byte_counts[256]) {
@@ -93,17 +72,17 @@ void retrieve_byte_codes(const node_t *root) {
 }
 
 int main(int argc, char *argv[]) {
-    const char *filename;
+    FILE *input_file, *output_file;
     unsigned int byte_counts[256];
     node_t *tree;
 
-    parse_arguments(argc, argv, &filename);
+    parse_arguments(argc, argv, DECODE_PROGRAM_NAME, &input_file, &output_file);
 
-    count_bytes(filename, byte_counts);
+    count_bytes(input_file, byte_counts);
 
     tree = create_tree_from_byte_counts(byte_counts);
 
-    node_encode(tree, stdout);
+    node_encode(tree, output_file);
 
     retrieve_byte_codes(tree);
 
@@ -115,5 +94,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    return 0;
+    close_files(input_file, output_file);
+
+    return EXIT_SUCCESS;
 }

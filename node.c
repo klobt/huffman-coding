@@ -51,23 +51,21 @@ void node_free(node_t *root) {
 
 void node_print(const node_t *root) {
     if (root == NULL) {
-        putchar('N');
+        putc('N', stderr);
 
         return;
     }
 
     switch (root->base.type) {
         case NODE_LEAF:
-            putchar('\'');
-            putchar(root->leaf.byte);
-            putchar('\'');
+            fprintf(stderr, "'%c'", root->leaf.byte);
             break;
         case NODE_BRANCH:
-            putchar('(');
+            putc('(', stderr);
             node_print(root->branch.left);
-            putchar(' ');
+            putc(' ', stderr);
             node_print(root->branch.right);
-            putchar(')');
+            putc(')', stderr);
             break;
     }
 }

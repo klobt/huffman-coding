@@ -1,31 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "config.h"
 #include "node.h"
-
-void parse_arguments(int argc, char *argv[]) {
-    if (argc != 1) {
-        fprintf(stderr, "usage: %s\n", argv[0]);
-
-        exit(EXIT_FAILURE);
-    }
-}
+#include "utilities.h"
 
 int main(int argc, char *argv[]) {
+    FILE *input_file, *output_file;
     node_t *tree;
 
-    parse_arguments(argc, argv);
+    parse_arguments(argc, argv, DECODE_PROGRAM_NAME, &input_file, &output_file);
 
-    if (node_decode(stdin, &tree) < 0) {
-        perror(DECODE_PROGRAM_NAME);
-
+    if (node_decode(input_file, &tree) < 0) {
+        fprintf(stderr, "%s: Failed to decode the tree.\n", DECODE_PROGRAM_NAME);
         return EXIT_FAILURE;
     }
 
     node_print(tree);
-    putchar('\n');
+    putc('\n', stderr);
 
     node_free(tree);
+
+    close_files(input_file, output_file);
 
     return EXIT_SUCCESS;
 }
