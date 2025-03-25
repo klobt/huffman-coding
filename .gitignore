@@ -1,6 +1,7 @@
 *
 !/.gitignore
 !/meson.build
+!/demo.gif
 !/encode.c
 !/decode.c
 !/array.h
