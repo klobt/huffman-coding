@@ -1,5 +1,5 @@
-#ifndef KLOBT_HUFFMAN_CODING__ARRAY_
-#define KLOBT_HUFFMAN_CODING__ARRAY_
+#ifndef KLOBT_HUFFMAN_CODING__ARRAY_H_
+#define KLOBT_HUFFMAN_CODING__ARRAY_H_
 
 #include <stddef.h>
 #include <stdlib.h>

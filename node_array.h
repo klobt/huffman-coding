@@ -1,5 +1,5 @@
-#ifndef KLOBT_HUFFMAN_CODING__NODE_ARRAY_
-#define KLOBT_HUFFMAN_CODING__NODE_ARRAY_
+#ifndef KLOBT_HUFFMAN_CODING__NODE_ARRAY_H_
+#define KLOBT_HUFFMAN_CODING__NODE_ARRAY_H_
 
 #include "array.h"
 #include "node.h"

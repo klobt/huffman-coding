@@ -1,5 +1,5 @@
-#ifndef KLOBT_HUFFMAN_CODING__UTILITIES_
-#define KLOBT_HUFFMAN_CODING__UTILITIES_
+#ifndef KLOBT_HUFFMAN_CODING__UTILITIES_H_
+#define KLOBT_HUFFMAN_CODING__UTILITIES_H_
 
 #include <stdbool.h>
 #include <stdio.h>

@@ -1,5 +1,5 @@
-#ifndef KLOBT_HUFFMAN_CODING__BINARY_
-#define KLOBT_HUFFMAN_CODING__BINARY_
+#ifndef KLOBT_HUFFMAN_CODING__BINARY_H_
+#define KLOBT_HUFFMAN_CODING__BINARY_H_
 
 #include <stdio.h>
 #include "char_array.h"

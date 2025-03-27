@@ -1,5 +1,5 @@
-#ifndef KLOBT_HUFFMAN_CODING__NODE_
-#define KLOBT_HUFFMAN_CODING__NODE_
+#ifndef KLOBT_HUFFMAN_CODING__NODE_H_
+#define KLOBT_HUFFMAN_CODING__NODE_H_
 
 #include <stdio.h>
 #include "node_breadcrumb_array.h"
